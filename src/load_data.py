@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Time-stamp: <Last change 2013-10-14 15:02:36 by Steffen Waldherr>
+# Time-stamp: <Last change 2013-10-23 13:37:01 by Steffen Waldherr>
 
 from optparse import OptionParser
 
@@ -13,7 +13,7 @@ import numpy as np
 def get_data_20131014():
     db = shelve.open(os.path.join("data","2013-10-14-results-ba-boehmert","data.db"))
     if not "all" in db:
-        raise Exception("Combined data not found in database, maybe it was not loaded previously?")
+        raise Exception("Combined data from 2013-10-14 not found in database, maybe it was not loaded previously?")
     return db["all"]
 
 def load_data_20131014(filename, storedb=None):
