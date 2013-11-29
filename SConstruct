@@ -27,7 +27,20 @@ for f in texdocs:
 
 datafiles = Glob("data/2013-10-14-results-ba-boehmert/*/*.txt")
 data20131014 = env.Command("data/2013-10-14-results-ba-boehmert/data.db", datafiles + ["src/load_data.py",], "python src/load_data.py -d 2013-10-14")
+data20131104 = env.Command("data/2013-11-04-results-ba-boehmert/data.db", datafiles + ["src/load_data.py",], "python src/load_data.py -d 2013-11-04")
 
 t = env.Pytask("results/stat_mutualinfo/stat_mutualinfo.log", "tasks/il6_mutualinfo.py")
 Depends(t, "src/mutualinfo.py")
 Depends(t, data20131014)
+
+t = env.Pytask("results/stat_mutualinfo_20131104/stat_mutualinfo_20131104.log", "tasks/il6_mutualinfo.py")
+Depends(t, "src/mutualinfo.py")
+Depends(t, data20131104)
+
+env.Zip("il6-heterogeneity-mutualinfo.zip", datafiles)
+env.Zip("il6-heterogeneity-mutualinfo.zip", "src/__init__.py")
+env.Zip("il6-heterogeneity-mutualinfo.zip", "src/mutualinfo.py")
+env.Zip("il6-heterogeneity-mutualinfo.zip", "src/load_data.py")
+env.Zip("il6-heterogeneity-mutualinfo.zip", "tasks/__init__.py")
+env.Zip("il6-heterogeneity-mutualinfo.zip", "tasks/il6_mutualinfo.py")
+env.Zip("il6-heterogeneity-mutualinfo.zip", "run.py")

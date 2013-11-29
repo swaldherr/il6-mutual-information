@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Time-stamp: <Last change 2013-10-23 13:37:01 by Steffen Waldherr>
+# Time-stamp: <Last change 2013-11-14 15:38:41 by Steffen Waldherr>
 
 from optparse import OptionParser
 
@@ -10,13 +10,13 @@ import glob
 import os
 import numpy as np
 
-def get_data_20131014():
-    db = shelve.open(os.path.join("data","2013-10-14-results-ba-boehmert","data.db"))
+def get_data(datadir):
+    db = shelve.open(os.path.join("data",datadir,"data.db"))
     if not "all" in db:
-        raise Exception("Combined data from 2013-10-14 not found in database, maybe it was not loaded previously?")
+        raise Exception("Combined data '%s' not found in database, maybe it was not loaded previously?" % datadir)
     return db["all"]
 
-def load_data_20131014(filename, storedb=None):
+def load_data(filename, storedb=None):
     ident = os.path.basename(filename)[:-4].split("_")
     df = pandas.read_csv(filename)
     del df["Unnamed: 0"]
@@ -30,10 +30,16 @@ def load_data_20131014(filename, storedb=None):
         storedb["_".join(ident)] = df
     return ident, df
 
-def combine_data_20131014(storedb):
+def combine_data(storedb):
     df = reduce(lambda df1, df2: df1.append(df2, ignore_index=True), (storedb[i] for i in storedb.keys() if i.startswith("V")))
     storedb["all"] = df
     return df
+
+def get_data_20131014():
+    return get_data("2013-10-14-results-ba-boehmert")
+
+def get_data_20131104():
+    return get_data("2013-11-04-results-ba-boehmert")
 
 def main():
     usage = """%program [options]"""
@@ -46,8 +52,16 @@ def main():
         db = shelve.open(os.path.join("data","2013-10-14-results-ba-boehmert","data.db"))
         for f in files:
             printv("Loading data from %s." % f, options)
-            load_data_20131014(f, db)
-        combine_data_20131014(db)
+            load_data(f, db)
+        combine_data(db)
+        db.close()
+    if options.data == "2013-11-04":
+        files = glob.glob(os.path.join("data","2013-11-04-results-ba-boehmert","*","*.txt"))
+        db = shelve.open(os.path.join("data","2013-11-04-results-ba-boehmert","data.db"))
+        for f in files:
+            printv("Loading data from %s." % f, options)
+            load_data(f, db)
+        combine_data(db)
         db.close()
 
 def printv(message, opt):

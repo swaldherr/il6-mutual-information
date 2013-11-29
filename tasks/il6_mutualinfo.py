@@ -1,7 +1,7 @@
 """
 Analysis of mutual information in IL6/Stat signalling
 """
-# Time-stamp: <Last change 2013-10-16 13:22:33 by Steffen Waldherr>
+# Time-stamp: <Last change 2013-11-29 15:47:29 by Steffen Waldherr>
 
 import numpy as np
 import itertools
@@ -18,9 +18,14 @@ class StatMutualInfo(scripttool.Task):
     """
     Compute mutual information between Stat and pStat
     """
+    customize = {"data": "20131014",
+                 }
 
     def run(self):
-        dataframe = load_data.get_data_20131014()
+        if self.data == "20131014":
+            dataframe = load_data.get_data_20131014()
+        elif self.data == "20131104":
+            dataframe = load_data.get_data_20131104()
         bioreps = set(dataframe["bio-repl"])
         techreps = set(dataframe["tech-repl"])
         cell = set(dataframe["cell"])
@@ -32,19 +37,21 @@ class StatMutualInfo(scripttool.Task):
                          * (dataframe["cell"] == c) * (dataframe["stim"] == s))
             if sum(selection) <= 1:
                 continue
-            stat = dataframe[selection]["APC-A"]
-            pstat = dataframe[selection]["FITC-A"]
-            mi = compute_mutual_information(stat, pstat)
+            label1 = "APC-A"
+            data1 = dataframe[selection][label1]
+            label2 = "FITC-A" if not np.isnan(dataframe[selection]["FITC-A"][0]) else "PE-A"
+            data2 = dataframe[selection][label2]
+            mi = compute_mutual_information(data1, data2)
             if s == "stim IL6":
                 mi_il6.append(mi)
             if s == "stim Hyper IL6":
                 mi_hyperil6.append(mi)
             self.printf("MI for %s_%s_%s_%s: %*s %.5f bit" % (b, t, c, s, 30 - len("_".join((b,t,c,s))), " ", mi))
-            fig, ax = self.make_ax(name="pstat-stat_" + "_".join((b,t,c,s)),
-                               xlabel="Stat",
-                               ylabel="pStat",
-                               title="pStat vs. Stat in dataset " + "_".join((b,t,c,s)))
-            ax.plot(stat, pstat, "b.")
+            fig, ax = self.make_ax(name="%s-%s_" % (label1, label2) + "_".join((b,t,c,s)),
+                               xlabel=label1,
+                               ylabel=label2,
+                               title="%s vs. %s in dataset " % (label1, label2) + "_".join((b,t,c,s)))
+            ax.plot(data1, data2, "b.")
         self.printf("Mutual information for stim IL6:")
         self.printf("Mean = %g, std = %g" % (np.mean(mi_il6), np.std(mi_il6)), indent=1)
         self.printf("Mutual information for stim Hyper IL6:")
@@ -55,6 +62,7 @@ class StatMutualInfo(scripttool.Task):
 
 # creation of my experiments
 scripttool.register_task(StatMutualInfo(), ident="stat_mutualinfo")
+scripttool.register_task(StatMutualInfo(data="20131104"), ident="stat_mutualinfo_20131104")
 
 # code from http://stackoverflow.com/questions/10038543/tracking-down-the-assumptions-made-by-scipys-ttest-ind-function
 def compute_t_stat(pop1,pop2):
