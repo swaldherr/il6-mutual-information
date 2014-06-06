@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Time-stamp: <Last change 2013-11-14 15:38:41 by Steffen Waldherr>
+# Time-stamp: <Last change 2014-06-06 15:14:51 by Steffen Waldherr>
 
 from optparse import OptionParser
 
@@ -18,7 +18,7 @@ def get_data(datadir):
 
 def load_data(filename, storedb=None):
     ident = os.path.basename(filename)[:-4].split("_")
-    df = pandas.read_csv(filename)
+    df = pandas.read_csv(filename, sep='\t')
     del df["Unnamed: 0"]
     del df["Unnamed: 6"]
     df.insert(0, "stim", ident[4])
