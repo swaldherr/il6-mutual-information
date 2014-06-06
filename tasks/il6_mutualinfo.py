@@ -1,7 +1,7 @@
 """
 Analysis of mutual information in IL6/Stat signalling
 """
-# Time-stamp: <Last change 2013-11-29 15:47:29 by Steffen Waldherr>
+# Time-stamp: <Last change 2014-06-06 15:28:47 by Steffen Waldherr>
 
 import numpy as np
 import itertools
@@ -33,8 +33,8 @@ class StatMutualInfo(scripttool.Task):
         mi_il6 = []
         mi_hyperil6 = []
         for b, t, c, s in itertools.product(bioreps, techreps, cell, stim):
-            selection = ((dataframe["bio-repl"] == b) * (dataframe["tech-repl"] == t)
-                         * (dataframe["cell"] == c) * (dataframe["stim"] == s))
+            selection = ((dataframe["bio-repl"] == b) & (dataframe["tech-repl"] == t)
+                         & (dataframe["cell"] == c) & (dataframe["stim"] == s))
             if sum(selection) <= 1:
                 continue
             label1 = "APC-A"
