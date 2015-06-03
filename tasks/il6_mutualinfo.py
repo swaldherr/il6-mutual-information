@@ -1,7 +1,7 @@
 """
 Analysis of mutual information in IL6/Stat signalling
 """
-# Time-stamp: <Last change 2014-06-06 15:28:47 by Steffen Waldherr>
+# Time-stamp: <Last change 2015-06-02 17:11:14 by Steffen Waldherr>
 
 import numpy as np
 import itertools
@@ -39,7 +39,7 @@ class StatMutualInfo(scripttool.Task):
                 continue
             label1 = "APC-A"
             data1 = dataframe[selection][label1]
-            label2 = "FITC-A" if not np.isnan(dataframe[selection]["FITC-A"][0]) else "PE-A"
+            label2 = "FITC-A" if not np.isnan(dataframe[selection]["FITC-A"].values[0]) else "PE-A"
             data2 = dataframe[selection][label2]
             mi = compute_mutual_information(data1, data2)
             if s == "stim IL6":
