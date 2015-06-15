@@ -12,7 +12,7 @@ import scripttool
 from src import mutualinfo
 from src import load_data
 
-compute_mutual_information = scripttool.memoize.filecache(mutualinfo.compute_mutual_information)
+compute_mutual_information = mutualinfo.compute_mutual_information
 
 class StatMutualInfo(scripttool.Task):
     """
