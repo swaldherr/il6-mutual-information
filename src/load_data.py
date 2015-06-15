@@ -16,6 +16,13 @@ def get_data(datadir):
         raise Exception("Combined data '%s' not found in database, maybe it was not loaded previously?" % datadir)
     return db["all"]
 
+def load_data2(filename, storedb=None):
+    df = pandas.read_csv(filename, sep='\t')
+    ident = hash(filename)
+    if storedb is not None:
+        storedb[str(ident)] = df
+    return ident, df
+    
 def load_data(filename, storedb=None):
     ident = os.path.basename(filename)[:-4].split("_")
     df = pandas.read_csv(filename, sep='\t')
@@ -32,6 +39,11 @@ def load_data(filename, storedb=None):
 
 def combine_data(storedb):
     df = reduce(lambda df1, df2: df1.append(df2, ignore_index=True), (storedb[i] for i in storedb.keys() if i.startswith("V")))
+    storedb["all"] = df
+    return df
+
+def combine_data2(storedb):
+    df = reduce(lambda df1, df2: df1.append(df2, ignore_index=True), (storedb[i] for i in storedb.keys()))
     storedb["all"] = df
     return df
 
@@ -62,6 +74,14 @@ def main():
             printv("Loading data from %s." % f, options)
             load_data(f, db)
         combine_data(db)
+        db.close()
+    if options.data == "test":
+        files = glob.glob(os.path.join("data","test-data","*.txt"))
+        db = shelve.open(os.path.join("data","test-data","data.db"))
+        for f in files:
+            printv("Loading data from %s." % f, options)
+            load_data2(f, db)
+        combine_data2(db)
         db.close()
 
 def printv(message, opt):
