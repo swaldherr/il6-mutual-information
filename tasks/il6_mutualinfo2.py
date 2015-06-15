@@ -1,7 +1,7 @@
 """
 Analysis of mutual information in IL6/Stat signalling
 """
-# Time-stamp: <Last change 2015-06-02 17:11:14 by Steffen Waldherr>
+# Time-stamp: <Last change 2015-06-15 13:36:43 by Steffen Waldherr>
 
 import numpy as np
 import itertools
@@ -19,7 +19,7 @@ class StatMutualInfo(scripttool.Task):
     Compute mutual information between Stat and pStat
     """
     customize = {"data": "test-data",
-                 "labels": set(("STAT3", "pSTAT3")),
+                 "labels": set(("STAT3", "pSTAT3", "SSC", "DAPI")),
                  }
 
     def run(self):
@@ -40,15 +40,15 @@ class StatMutualInfo(scripttool.Task):
                 if np.any(np.isnan(data1)) or np.any(np.isnan(data2)):
                     continue
                 this_mi = compute_mutual_information(data1, data2)
-                ident = (exp, stim, conc, cell)
-                identstr = "%d_%s_%.2f_%s" % ident
+                ident = (exp, stim, conc, cell, label1, label2)
+                identstr = "%d_%s_%.2f_%s_%s_%s" % ident
                 mi[ident] = this_mi
-            self.printf("MI for %s: %.5f bit" % (identstr, this_mi))
-            fig, ax = self.make_ax(name="%s-%s_" % (label1, label2) + "_" + identstr,
-                               xlabel=label1,
-                               ylabel=label2,
-                               title="%s vs. %s in dataset " % (label1, label2) + identstr)
-            ax.plot(data1, data2, "b.")
+                self.printf("MI for %s: %.5f bit" % (identstr, this_mi))
+                fig, ax = self.make_ax(name="%s-%s_" % (label1, label2) + "_" + identstr,
+                                   xlabel=label1,
+                                   ylabel=label2,
+                                   title="%s vs. %s in dataset " % (label1, label2) + identstr)
+                ax.plot(data1, data2, "b.")
 
 # creation of my experiments
 scripttool.register_task(StatMutualInfo(), ident="mutual-info2-test")
