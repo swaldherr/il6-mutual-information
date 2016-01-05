@@ -1,7 +1,7 @@
 """
 Analysis of mutual information in IL6/Stat signalling
 """
-# Time-stamp: <Last change 2015-12-18 08:32:11 by Steffen Waldherr>
+# Time-stamp: <Last change 2016-01-05 12:31:20 by Steffen Waldherr>
 
 import numpy as np
 import itertools
@@ -36,11 +36,12 @@ class StatMutualInfo(scripttool.Task):
                 continue
             for label1, label2 in itertools.combinations(self.labels, 2):
                 ident = (exp, stim, conc, cell, label1, label2)
-                identstr = "%d_%s_%s_%s_%s_%s" % ident
-                print "Starting computation for %s ..." % ident
+                identstr = ("%d_%s_%s_%s_%s_%s" % ident).replace("/","_")
+                print "Starting computation for %s ..." % str(ident)
                 data1 = dataframe[selection][label1]
                 data2 = dataframe[selection][label2]
                 if np.any(np.isnan(data1)) or np.any(np.isnan(data2)):
+                    print "Found NaN data, aborting computation."
                     continue
                 this_mi = compute_mutual_information(data1, data2)
                 mi[ident] = this_mi
