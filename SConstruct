@@ -16,7 +16,6 @@ bld = Builder(action = "python run.py --task $TARGET --log --export=png --memoiz
                  emitter = add_targets)
 
 env = Environment(ENV={"TEXINPUTS":os.environ.get("TEXINPUTS",""), "HOME":os.environ["HOME"], "PATH":os.environ["PATH"],
-                       "PYTHONPATH":os.environ["PYTHONPATH"],
 		       "TARFLAGS":"-c -z",},
     		  BUILDERS = {'Pytask' : bld})
 
@@ -52,6 +51,13 @@ datafiles20131014 = Glob("data/2013-10-14-results-ba-boehmert/*/*.txt")
 data20131014 = env.Command("data/2013-10-14-results-ba-boehmert/data.db", datafiles20131014 + ["src/load_data.py",], "python src/load_data.py -d 2013-10-14")
 datafiles20131104 = Glob("data/2013-11-04-results-ba-boehmert/*/*.txt")
 data20131104 = env.Command("data/2013-11-04-results-ba-boehmert/data.db", datafiles20131104 + ["src/load_data.py",], "python src/load_data.py -d 2013-11-04")
+testdatafiles = Glob("data/test-data/*.txt")
+testdata = env.Command("data/test-data/data.db", testdatafiles + ["src/load_data.py",], "python src/load_data.py -d test")
+
+
+t = env.Pytask("results/mutual-info2-test/mutual-info2-test.log", "tasks/il6_mutualinfo2.py")
+Depends(t, "src/mutualinfo.py")
+Depends(t, testdata)
 
 t = env.Pytask("results/stat_mutualinfo/stat_mutualinfo.log", "tasks/il6_mutualinfo.py")
 Depends(t, "src/mutualinfo.py")
