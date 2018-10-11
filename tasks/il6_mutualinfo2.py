@@ -1,7 +1,7 @@
 """
 Analysis of mutual information in IL6/Stat signalling
 """
-# Time-stamp: <Last change 2016-01-05 12:31:20 by Steffen Waldherr>
+# Time-stamp: <Last change 2018-10-11 14:41:18 by Steffen Waldherr>
 
 import numpy as np
 import itertools
@@ -55,25 +55,4 @@ class StatMutualInfo(scripttool.Task):
 
 # creation of my experiments
 scripttool.register_task(StatMutualInfo(), ident="mutual-info2-test")
-
-# code from http://stackoverflow.com/questions/10038543/tracking-down-the-assumptions-made-by-scipys-ttest-ind-function
-def compute_t_stat(pop1,pop2):
-
-    num1 = pop1.shape[0];
-    num2 = pop2.shape[0];
-
-    # The formula for t-stat when population variances differ.
-    t_stat = (np.mean(pop1) - np.mean(pop2))/np.sqrt( np.var(pop1)/num1 + np.var(pop2)/num2 )
-
-    # ADDED: The Welch-Satterthwaite degrees of freedom.
-    df = ((np.var(pop1)/num1 + np.var(pop2)/num2)**(2.0))/(   (np.var(pop1)/num1)**(2.0)/(num1-1) +  (np.var(pop2)/num2)**(2.0)/(num2-1) ) 
-
-    # Am I computing this wrong?
-    # It should just come from the CDF like this, right?
-    # The extra parameter is the degrees of freedom.
-
-    one_tailed_p_value = 1.0 - stats.t.cdf(t_stat,df)
-    two_tailed_p_value = 1.0 - ( stats.t.cdf(np.abs(t_stat),df) - stats.t.cdf(-np.abs(t_stat),df) )    
-
-    return t_stat, one_tailed_p_value, two_tailed_p_value
 
