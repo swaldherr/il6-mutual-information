@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Time-stamp: <Last change 2014-06-06 15:14:51 by Steffen Waldherr>
+# Time-stamp: <Last change 2018-10-12 08:19:02 by Steffen Waldherr>
 
 from optparse import OptionParser
 
@@ -16,8 +16,22 @@ def get_data(datadir):
         raise Exception("Combined data '%s' not found in database, maybe it was not loaded previously?" % datadir)
     return db["all"]
 
+def get_data2(datadir):
+    db = shelve.open(os.path.join(datadir,"data.db"))
+    if not "all" in db:
+        raise Exception("Combined data '%s' not found in database, maybe it was not loaded previously with src/load_data.py ?" % datadir)
+    return db["all"]
+
 def load_data2(filename, storedb=None):
     df = pandas.read_csv(filename, sep='\t')
+    ident = hash(filename)
+    if storedb is not None:
+        storedb[str(ident)] = df
+    return ident, df
+
+def load_data_excel(filename, storedb=None):
+    ef = pandas.ExcelFile(filename)
+    df = pandas.read_excel(ef, sheetname=ef.sheet_names[0])
     ident = hash(filename)
     if storedb is not None:
         storedb[str(ident)] = df
@@ -54,27 +68,12 @@ def get_data_20131104():
     return get_data("2013-11-04-results-ba-boehmert")
 
 def main():
-    usage = """%program [options]"""
+    usage = """%prog [options]"""
     parser = OptionParser(usage)
     parser.add_option("-v","--verbose", action="store_true", help="print messages")
     parser.add_option("-d","--data", action="store", help="choose data directory")
+    parser.add_option("-x","--excel", action="store_true", help="read .xlsx files instead of .txt")
     options, args = parser.parse_args()
-    if options.data == "2013-10-14":
-        files = glob.glob(os.path.join("data","2013-10-14-results-ba-boehmert","*","*.txt"))
-        db = shelve.open(os.path.join("data","2013-10-14-results-ba-boehmert","data.db"))
-        for f in files:
-            printv("Loading data from %s." % f, options)
-            load_data(f, db)
-        combine_data(db)
-        db.close()
-    if options.data == "2013-11-04":
-        files = glob.glob(os.path.join("data","2013-11-04-results-ba-boehmert","*","*.txt"))
-        db = shelve.open(os.path.join("data","2013-11-04-results-ba-boehmert","data.db"))
-        for f in files:
-            printv("Loading data from %s." % f, options)
-            load_data(f, db)
-        combine_data(db)
-        db.close()
     if options.data == "test":
         files = glob.glob(os.path.join("data","test-data","*.txt"))
         db = shelve.open(os.path.join("data","test-data","data.db"))
@@ -83,7 +82,22 @@ def main():
             load_data2(f, db)
         combine_data2(db)
         db.close()
+    else:
+        if options.excel:
+            files = glob.glob(os.path.join(options.data,"*.xlsx"))
+        else:
+            files = glob.glob(os.path.join(options.data,"*.txt"))
+        db = shelve.open(os.path.join(options.data,"data.db"))
+        for f in files:
+            printv("Loading data from %s." % f, options)
+            if options.excel:
+                load_data_excel(f, db)
+            else:
+                load_data2(f, db)
+        combine_data2(db)
+        db.close()
 
+    
 def printv(message, opt):
     if opt.verbose:
         print message
