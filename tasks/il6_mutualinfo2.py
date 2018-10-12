@@ -1,7 +1,7 @@
 """
 Analysis of mutual information in IL6/Stat signalling
 """
-# Time-stamp: <Last change 2018-10-11 14:41:18 by Steffen Waldherr>
+# Time-stamp: <Last change 2018-10-12 08:28:12 by Steffen Waldherr>
 
 import numpy as np
 import itertools
@@ -19,11 +19,15 @@ class StatMutualInfo(scripttool.Task):
     Compute mutual information between Stat and pStat
     """
     customize = {"data": "test-data",
+                 "rawdata": False,
                  "labels": set(("STAT3", "pSTAT3", "SSC", "DAPI")),
                  }
 
     def run(self):
-        dataframe = load_data.get_data(self.data)
+        if self.rawdata:
+            dataframe = load_data.get_data2(self.data)
+        else:
+            dataframe = load_data.get_data(self.data)
         exps = set(dataframe["Exp"])
         cells = set(dataframe["Cell"])
         stims = set(dataframe["Stim"])
@@ -37,16 +41,20 @@ class StatMutualInfo(scripttool.Task):
             for label1, label2 in itertools.combinations(self.labels, 2):
                 ident = (exp, stim, conc, cell, label1, label2)
                 identstr = ("%d_%s_%s_%s_%s_%s" % ident).replace("/","_")
-                print "Starting computation for %s ..." % str(ident)
-                data1 = dataframe[selection][label1]
-                data2 = dataframe[selection][label2]
+                try:
+                    data1 = dataframe[selection][label1]
+                    data2 = dataframe[selection][label2]
+                except KeyError:
+                    print "Data for %s not found in %s." % (identstr, self.data)
+                    continue
+                print "Starting computation for %s ..." % identstr
                 if np.any(np.isnan(data1)) or np.any(np.isnan(data2)):
                     print "Found NaN data, aborting computation."
                     continue
                 this_mi = compute_mutual_information(data1, data2)
                 mi[ident] = this_mi
                 self.printf("MI for %s: %.5f bit" % (identstr, this_mi))
-                print "MI for %s: %.5f bit" % (identstr, this_mi)
+                # print "MI for %s: %.5f bit" % (identstr, this_mi)
                 fig, ax = self.make_ax(name="%s-%s_" % (label1, label2) + "_" + identstr,
                                    xlabel=label1,
                                    ylabel=label2,
