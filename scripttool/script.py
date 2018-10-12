@@ -2,7 +2,7 @@
 provides scripttool classes
 """
 # Copyright (C) 2011 Steffen Waldherr waldherr@ist.uni-stuttgart.de
-# Time-stamp: <Last change 2018-10-12 08:32:33 by Steffen Waldherr>
+# Time-stamp: <Last change 2018-10-12 09:54:53 by Steffen Waldherr>
 
 import sys
 import os
@@ -12,6 +12,7 @@ import shelve
 import copy
 import warnings
 import csv
+import errno
 
 import plotting
 import memoize
@@ -124,7 +125,7 @@ class Task(object):
         self.figures[name] = fig
         return fig, ax
 
-    def save_figures(self, names=None, format="png"):
+    def save_figures(self, names=None, format="png", **kwargs):
         """
         save all figures for this task to their respective files.
         normally not called manually, because if the option "export" is set to true,
@@ -133,16 +134,23 @@ class Task(object):
         if names is None:
             names = self.figures.keys()
         for i in names:
-            self.figures[i].savefig(os.path.join(self.get_output_dir(), i+"." + format))
+            self.figures[i].savefig(os.path.join(self.get_output_dir(**kwargs), i+"." + format))
 
-    def get_output_dir(self):
+    def get_output_dir(self, force_exists=False):
         """
         get name of task specific output directory
         """
         try:
-            return os.path.join(scriptconfig["output_dir"], self._ident)
+            output_dir = os.path.join(scriptconfig["output_dir"], self._ident)
         except AttributeError:
-            return os.path.join(scriptconfig["output_dir"], self.__class__.__name__)
+            output_dir = os.path.join(scriptconfig["output_dir"], self.__class__.__name__)
+        if force_exists:
+            try:
+                os.makedirs(output_dir)
+            except OSError as exception:
+                if exception.errno != errno.EEXIST:
+                    raise
+        return output_dir
 
     def csv_export(self, filename, data, headers=None, delimiter="\t"):
         """

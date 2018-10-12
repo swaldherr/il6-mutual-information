@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Time-stamp: <Last change 2018-10-12 08:30:10 by Steffen Waldherr>
+# Time-stamp: <Last change 2018-10-12 09:44:06 by Steffen Waldherr>
 
 from optparse import OptionParser
 import os
@@ -20,6 +20,7 @@ def main():
     scripttool.script.ensure_output_dir()
     task = il6_mutualinfo2.StatMutualInfo(data=options.data, rawdata=True)
     task.run()
+    task.save_figures(format="pdf", force_exists=True)
 
     
 if __name__ == "__main__":
