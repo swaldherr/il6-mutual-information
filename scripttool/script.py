@@ -2,7 +2,7 @@
 provides scripttool classes
 """
 # Copyright (C) 2011 Steffen Waldherr waldherr@ist.uni-stuttgart.de
-# Time-stamp: <Last change 2015-11-06 12:18:51 by Steffen Waldherr>
+# Time-stamp: <Last change 2018-10-12 08:32:33 by Steffen Waldherr>
 
 import sys
 import os
@@ -232,7 +232,7 @@ def ensure_output_dir():
     try:
         os.lstat(scriptconfig["output_dir"])
     except OSError:
-        os.mkdir(scriptconfig["output_dir"])
+        os.makedirs(scriptconfig["output_dir"])
     
 def register_task(task, ident=None):
     """
